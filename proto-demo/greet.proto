@@ -1,5 +1,5 @@
 syntax="proto3";// syntax of the proto file (current version is 3)
-package ro.tuc.ds2020.grpc.proto; 
+package ro.tuc.ds2020.grpc; 
 option java_multiple_files = true; // use multiple file for each object instead of one big file
 
 message ChatMessage {

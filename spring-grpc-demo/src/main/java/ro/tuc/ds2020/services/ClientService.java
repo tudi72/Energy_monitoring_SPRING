@@ -1,10 +1,6 @@
 package ro.tuc.ds2020.services;
-
-
-import ro.tuc.ds2020.dtos.DeviceConsumptionDTO;
 import ro.tuc.ds2020.dtos.DeviceDTO;
 import ro.tuc.ds2020.entities.Device;
-import ro.tuc.ds2020.entities.EnergyConsumption;
 import ro.tuc.ds2020.entities.MyUser;
 
 import java.text.ParseException;
