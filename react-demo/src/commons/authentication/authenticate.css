@@ -1,0 +1,17 @@
+.auth {
+    text-align: center;
+    font-family: 'Roboto', sans-serif;
+}
+
+
+.auth-header {
+    background-color: #F4F4F4;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: calc(10px + 2vmin);
+    font-family: 'Roboto', sans-serif;
+
+}
+  

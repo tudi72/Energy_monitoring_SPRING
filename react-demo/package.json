@@ -1,0 +1,44 @@
+{
+  "name": "react-demo",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "@emotion/react": "^11.9.3",
+    "@emotion/styled": "^11.9.3",
+    "@grpc/proto-loader": "^0.7.4",
+    "@mui/material": "^5.9.0",
+    "axios": "^0.18.1",
+    "bootstrap": "^4.3.1",
+    "google-protobuf": "^3.21.2",
+    "grpc": "^1.24.11",
+    "grpc-web": "^1.4.2",
+    "prop-types": "^15.6.2",
+    "react": "^17.0.2",
+    "react-bootstrap": "^1.3.0",
+    "react-calendar": "^3.9.0",
+    "react-dom": "^17.0.2",
+    "react-router-dom": "^4.3.1",
+    "react-scripts": "^3.3.0",
+    "react-table": "^7.8.0",
+    "react-table-6": "^6.11.0",
+    "reactstrap": "^9.1.5",
+    "recharts": "^2.1.15",
+    "sockjs-client": "^1.1.4",
+    "stompjs": "^2.3.3"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject"
+  },
+  "eslintConfig": {
+    "extends": "react-app"
+  },
+  "browserslist": [
+    ">0.2%",
+    "not dead",
+    "not ie <= 11",
+    "not op_mini all"
+  ]
+}
