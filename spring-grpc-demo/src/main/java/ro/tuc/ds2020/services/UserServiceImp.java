@@ -80,16 +80,10 @@ public class UserServiceImp implements UserService, UserDetailsService {
         if(name.length() >= 200) 
         {
             try{
-                log.info("[UserServiceImp.getUserFromToken] : name = " + name);
 
                 String username = jwtTokenHelper.getUsernameFromToken(name);
-
-
-
-                String regex = "[a-z]*[:space:]?" + username.toLowerCase() + "[:space:]?[a-z]*";
-    
-                log.info("[UserServiceImp.getUserFromToken] : name = " + regex);
-                return userRepository.findMyUserByName(regex);
+                log.info("[UserServiceImp.getUserFromToken]" + username);
+                return userRepository.findByUsername(username);
             
             }
             catch(Exception ex){
@@ -153,6 +147,19 @@ public class UserServiceImp implements UserService, UserDetailsService {
             return 0L;
         }
         
+    }
+
+    @Override
+    public MyUser getUserByUsername(String username) {
+        try{
+            // log.info("[UserServiceImp.getByUsername]: username" + username);
+
+            return userRepository.findByUsername(username);
+        }
+        catch(Exception ex){
+            log.error("[UserServiceIm]: Cannot delete user");
+            return null;
+        }    
     }
 
 }

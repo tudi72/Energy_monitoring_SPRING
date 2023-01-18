@@ -41,6 +41,8 @@ public interface UserService {
      */
     MyUser getUser(String name);
 
+    MyUser getUserByUsername(String username);
+
     /**
      * Method for retrieving an user based on its id
      * @param id

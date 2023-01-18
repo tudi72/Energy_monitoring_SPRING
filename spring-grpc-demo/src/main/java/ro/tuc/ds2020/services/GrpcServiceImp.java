@@ -32,13 +32,7 @@ public class GrpcServiceImp extends ChatServiceGrpc.ChatServiceImplBase{
 
          userList = UserList.newBuilder();
          userSet = new HashSet<>();
-         ChatMessage firstMessage = ChatMessage.newBuilder()
-            .setFrom("system")
-            .setTime(String.valueOf(Date.from(Instant.now())))
-            .setMsg("System welcomes you")
-            .build();
 
-         shownMessageList.put(firstMessage,true);
          this.userService = userService;
       }
 
@@ -51,83 +45,119 @@ public class GrpcServiceImp extends ChatServiceGrpc.ChatServiceImplBase{
             user = userService.getUser(request.getName());
             String username = user.getName();
 
-            User newUser = User.newBuilder()
+
+            
+            if(!userSet.contains(username)){
+
+               User newUser = User.newBuilder()
                .setId(request.getId())
                .setName(username)
                .build();
-            
-            if(!userSet.contains(username)){
+
                userList.addUsers(newUser);
+               userSet.add(username);
+               log.info("[GrpcService.join] : user " + username + " joins the chat...");
             }
+            log.info("[GrpcService.join] : user " + username + " already in chat...");
 
-            log.info("[GrpcService.join] : user " + username + " joins the chat...");
 
-        }
+            JoinResponse response = JoinResponse
+            .newBuilder()
+            .setError(0)
+            .setMsg(user.getName())
+            .build();
+
+            responseObserver.onNext(response);
+            responseObserver.onCompleted();
+
+         }
         catch(Exception ex){
             log.error("[GrpcService.join] : having error " +  ex.getMessage());
         }
 
-         JoinResponse response = JoinResponse
-            .newBuilder()
-            .setError(0)
-            .setMsg("Welcome " + user.getName() + " to the private chat...")
-            .build();
-
-        responseObserver.onNext(response);
-        responseObserver.onCompleted();
 
 
      }
 
      @Override
      public void sendMsg(ChatMessage request,StreamObserver<Empty> responseObserver) {
-        // find user and redirect him to ...
-         try{
-            this.isLoaded = true;
-            JWTTokenHelper helper = new JWTTokenHelper();
-            String role = helper.getAllRolesFromToken(request.getFrom());
-            String name = helper.getUsernameFromToken(request.getFrom());
-            // case 1. the admin is sending the message to someone
 
-            ChatMessage newMessage = ChatMessage.newBuilder()
-            .setFrom(name)
-            .setTo(request.getTo())
-            .setTime(request.getTime())
-            .setMsg(request.getMsg())
-            .setStatus(request.getStatus())
-            .build();
+            if(!request.getStatus().contains("r")) this.isLoaded = true;
+            else this.isLoaded = false;
+            if(!request.getFrom().contentEquals("system")){
+               try{
 
-            log.info("[GrpcServiceImp.sendMsg] : ROLE " + role + " and name " + name);
-            shownMessageList.put(newMessage,true);
+                  MyUser user = userService.getUser(request.getFrom());
+                  String from = user.getName();
+                  String to = request.getTo();  
+                  String status = request.getStatus();
 
-         }
-         catch(NullPointerException ex){
-            log.error("[GrpcService] : ",ex );
-         }
-         catch(Exception ex){
-            log.error("[GrpcService] : " + ex.getMessage());
-            log.error("[GrpcService] : " + ex.getLocalizedMessage());
-            log.error("[GrpcService] : " + ex.getCause());
-         }
+                  // log.info("[GrpcServiceImp.sendMsg] " + user.getName()+ " --("+status + ")--> "+ to);
+                  // case 1. the admin is sending the message to someone
 
-         Empty empty = Empty.newBuilder().build();
+                  ChatMessage newMessage = ChatMessage.newBuilder()
+                  .setFrom(user.getName())
+                  .setTo(request.getTo())
+                  .setTime(request.getTime())
+                  .setMsg(request.getMsg())
+                  .setStatus(request.getStatus())
+                  .build();
+
+                  if(status.contains("w"))
+                     log.info("[GrpcServiceImp.sendMsg] " +  user.getName()+ " --> "+ to + " writing... ");
+                  else 
+                     log.info("[GrpcServiceImp.sendMsg] " +  user.getName()+ " --> "+ to + " submitted : " + request.getMsg());
+
+                  if(status.contains("s")){
+                     shownMessageList.entrySet().stream()
+                     .filter(x -> {
+                     return (
+                        x.getKey().getFrom().contentEquals(from) && 
+                        x.getKey().getTo().contentEquals(to)   &&
+                        x.getKey().getStatus().contains("w")); 
+                     })
+                     .findAny()
+                     .filter(y -> {
+                        log.info("[GrpcServiceImp.DELETE] :" + y.getKey().getFrom() + "\'writing\' to " + y.getKey().getTo());
+                        shownMessageList.remove(y.getKey());
+                        return true;
+                     });
+
+                  }
+                  shownMessageList.put(newMessage,true);
+                  
+               }
+               catch(NullPointerException ex){
+                  log.error("[GrpcService] : ",ex );
+               }
+               catch(Exception ex){
+                  log.error("[GrpcService] : " + ex.getMessage());
+                  log.error("[GrpcService] : " + ex.getLocalizedMessage());
+                  log.error("[GrpcService] : " + ex.getCause());
+               }
+            Empty empty = Empty.newBuilder().build();
          responseObserver.onNext(empty);
          responseObserver.onCompleted();
 
-
+      }
+            else {
+               shownMessageList.keySet().stream()
+               .filter(x->x.getTime().contentEquals(request.getTime()))
+               .findAny()
+               .filter(x ->{
+                  shownMessageList.put(x,false);
+                  return true;
+               });
+            }
     }
 
      @Override
      public void receiveMsg(Empty request,StreamObserver<ChatMessage> responseObserver) {
 
          try{
-            Boolean isAdmin = false;
             // case 1. the admin is receiving messages
-            
             while(true){
-
                if(isLoaded){
-                     log.info("[GrpcService] : user receives message...");
                      shownMessageList.entrySet()
                      .stream()
                      .filter(x -> x.getValue())
@@ -136,7 +166,6 @@ public class GrpcServiceImp extends ChatServiceGrpc.ChatServiceImplBase{
                         shownMessageList.put(x.getKey(),false);
                         responseObserver.onNext(x.getKey());
                      });
-                     
                      this.isLoaded = false;
                   }
 
@@ -152,7 +181,7 @@ public class GrpcServiceImp extends ChatServiceGrpc.ChatServiceImplBase{
      @Override
      public void getAllUsers(Empty request,StreamObserver<UserList> responseObserver) {
 
-         log.info("[GrpcService.getAllUsers]");
+         log.info("[GrpcService.getAllUsers] : " + userSet.size() + " users");
          responseObserver.onNext(userList.build());
          responseObserver.onCompleted();
      }

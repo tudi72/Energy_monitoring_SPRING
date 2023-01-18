@@ -19,4 +19,5 @@ public interface MyUserRepository extends JpaRepository<MyUser,Long> {
     MyUser findMyUserByName(String regex);
 
 
+
 }

@@ -1,22 +1,30 @@
 import React from "react";
 import "./Chat.css";
+import Logo from "./../../../commons/images/typing.gif";
 
-export default function Chat({ msgList, sendMessage }) {
-
+export default function Chat({ msgList, sendMessage,username}) {
   function onChangeHanlder(){
     var msg = window.msgTextArea.value;
-    var status = "w";
-    console.log(msg);
-    sendMessage({msg : msg,status : status});
+    var from = username;
+    var to = window.localStorage.getItem("toUser")
+    var date = new Date().toLocaleString()
+    if(from !== to)
+      sendMessage({msg : msg,from : from,to: to,status : "w"});
   }
+
+
 
   function onSubmitHandler() {
     var msg = window.msgTextArea.value;
-    var status = "s";
-    sendMessage({msg : msg,status : status});
+    var date = new Date().toLocaleString()
+    var to = window.localStorage.getItem("toUser")
+    var from = username;
+    if(from !== to)
+      sendMessage({msg : msg,from : from,to: to,status : "s",date: date});
     window.msgTextArea.value = "";
   }
 
+  console.log("USERNAME",username);
   return (
     <div className="chat">
       <div className="chat-header">
@@ -61,6 +69,7 @@ function ChatCard({ chat }) {
         }
       >
         <div className="chatcard-msg">
+          {chat?.writing && <img src={Logo} alt="loading..."/>}
           <span>{chat?.msg}</span>
         </div>
         <div className="chatcard-time">
