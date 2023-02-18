@@ -1,0 +1,108 @@
+version: '3'
+
+services:
+  
+  mysql-demo-integration:
+    image: mysql
+    build:
+      context: ./
+      dockerfile: ./mysql/Dockerfile
+    container_name: mysql-demo-integration
+    restart: always
+    volumes:
+      - ./mysql/setup.sql:/docker-entrypoint-initdb.d/1.sql
+      - ./mysql/ds-mysql-initial-setup.sql:/docker-entrypoint-initdb.d/2.sql
+      - mysql-demo-integration:/var/lib/mysql
+    ports:
+      - 3307:3306
+    healthcheck:
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+      interval: 10s
+      retries: 5
+      start_period: 5s
+      timeout: 10s
+    environment:
+      - MYSQL_ROOT_PASSWORD=htoh
+    networks:
+      assignment1-network:
+         ipv4_address: 172.16.0.52
+ 
+  spring-demo-integration:
+    build:
+      context: ./
+      dockerfile: ./spring-demo/Dockerfile
+    container_name: spring-demo-integration
+    restart: always
+    volumes:
+     - "spring-demo-integration:/spring-demo/war"
+    environment:
+      - DB_IP=172.16.0.52
+      - DB_PORT=3306
+      - DB_USER=htoh
+      - DB_PASSWORD=htoh
+      - DB_DBNAME=city_db
+      - SPRING_RABBITMQ_HOST=172.16.0.55
+    ports:
+      - 8081:8080
+      - 9090:9090
+    depends_on:
+      mysql-demo-integration:
+         condition: service_healthy
+    networks:
+      assignment1-network:
+         ipv4_address: 172.16.0.53
+    
+  react-demo-integration:
+    build:
+      context: ./
+      dockerfile: ./react-demo/Dockerfile
+    container_name: react-demo-integration
+    restart: always
+    ports:
+      - 3001:80
+    networks:
+      assignment1-network:
+         ipv4_address: 172.16.0.54
+ 
+  rabbitmq-demo-integration:
+    image: rabbitmq:3.9.24-management
+    container_name: rabbitmq-demo-integration  
+    restart: always
+    build:
+      context: ./rabbitmq-demo
+      dockerfile: ./Dockerfile
+    ports:
+      - "15672:15672"
+      - "5672:5672"
+      - "61613:61613"
+    networks:
+      assignment1-network:
+         ipv4_address: 172.16.0.55
+
+  envoy-demo-integration:
+    image: envoyproxy/envoy-dev:b145180d17cac80aa5f9a7801429d52017fea6d1
+    container_name: envoy-demo-integration
+    restart: always
+    volumes:
+      - ./envoy-proxy-demo/envoy.yaml:/etc/envoy/envoy.yaml
+    ports:
+      - "8082:8082"
+      - "9901:9901"
+    networks:
+      assignment1-network:
+         ipv4_address: 172.16.0.56
+
+volumes:
+  spring-demo-integration:
+    driver:
+      local
+  mysql-demo-integration:
+    driver:
+      local
+  react-demo-integration:
+    driver:
+      local
+
+networks:
+  assignment1-network:
+    external: true
