@@ -20,7 +20,8 @@ export default function ChatPage({ client }) {
     const strRq = new ReceiveMsgRequest();
     strRq.setUser(localStorage.getItem("access_token"));
     
-    var chatStream = client.receiveMsg(strRq, {});
+    // changed from var --> const 20.feb.2023
+    const  chatStream = client.receiveMsg(strRq, {});
     chatStream.on("data", (response) => {
       console.log("[ChatPage.stream] :",response.array);
       
