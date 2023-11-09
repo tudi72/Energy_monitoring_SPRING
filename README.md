@@ -1,3 +1,7 @@
+## Distributed Web app
+Technologies: gRPC remote procedure, JWT token security, RabbitMQ for AMQP protocol, Java Spring, ReactJS UI, Docker Container
+The IP addresses for PostreSQL database, UI, backend, RabbitMQ and gRPC were set locally. 
+Motivation: App that receives continuous data from remote sensors that simulates Eolian Energy and displays in client UI the Real-time monitorization, data and statistics of Energy consumed per hour/day.
 # commands
 
 
